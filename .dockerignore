@@ -1,0 +1,5 @@
+gradle
+.git
+gradlew
+gradlew.bat
+*.md
