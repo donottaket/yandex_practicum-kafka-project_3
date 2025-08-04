@@ -32,15 +32,19 @@ ___
 
 Для запуска проекта необходимо выполнить следующие шаги:
 
+1. Запустить Docker Compose, который поднимет все необходимые контейнеры:
+
 ```bash
   docker compose up -d
 ```
 
-Дождаться запуска всех контейнеров
+2. Дождаться запуска всех контейнеров. Это можно сделать с помощью команды:
 
 ```bash
   docker compose logs -f
 ```
+
+3. Сконфигурировать Kafka Connect:
 
 ```bash
   curl -X PUT http://localhost:8083/connectors/pg-connector/config \
@@ -78,6 +82,8 @@ ___
 
 * Grafana http://localhost:3000. Логин/пароль по умолчанию: admin / admin. Нужно импортировать дашборды
   [connect](grafana/dashboards/connect.json). Здесь можно просматривать метрики, собранные с коннектора.
+
+* Посмотреть логи consumer сервиса, который выводит события в консоль:
 
 ```bash
   docker logs consumer
