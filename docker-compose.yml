@@ -52,6 +52,7 @@ services:
     container_name: kafka-broker-0
     ports:
       - "9094:9094"
+      - "9400:9404"
     depends_on:
       - kafka-controller-0
       - kafka-controller-1
@@ -80,6 +81,7 @@ services:
     container_name: kafka-broker-1
     ports:
       - "9095:9095"
+      - "9401:9404"
     depends_on:
       - kafka-controller-0
       - kafka-controller-1
@@ -108,6 +110,7 @@ services:
     container_name: kafka-broker-2
     ports:
       - "9096:9096"
+      - "9402:9404"
     depends_on:
       - kafka-controller-0
       - kafka-controller-1
@@ -210,6 +213,7 @@ services:
       - practical-work-5-network
     ports:
       - "8083:8083"
+      - "9403:9404"
     depends_on:
       kafka-broker-0:
         condition: service_healthy
