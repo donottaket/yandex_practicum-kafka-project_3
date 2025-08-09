@@ -1,11 +1,11 @@
 networks:
-  project-3-network:
+  practical-work-5-network:
     driver: bridge
 
 x-kafka-common: &kafka-common
   image: bitnami/kafka:latest
   networks:
-    - project-3-network
+    - practical-work-5-network
 
 x-kafka-common-env: &kafka-common-env
   KAFKA_ENABLE_KRAFT: yes
@@ -13,7 +13,11 @@ x-kafka-common-env: &kafka-common-env
   KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1000@kafka-controller-0:9091,1001@kafka-controller-1:9092,1002@kafka-controller-2:9093
   KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
   ALLOW_PLAINTEXT_LISTENER: yes
-  KAFKA_KRAFT_CLUSTER_ID: PROJECT_3_KAFKA_CLUSTER
+  KAFKA_KRAFT_CLUSTER_ID: PRACTICAL-WORK-5-KAFKA-CLUSTER
+  KAFKA_CFG_NUM_PARTITIONS: 3
+  KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_CFG_MIN_INSYNC_REPLICAS: 2
+  KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
 
 services:
   kafka-controller-0:
@@ -21,7 +25,6 @@ services:
     container_name: kafka-controller-0
     environment:
       <<: *kafka-common-env
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_NODE_ID: 1000
       KAFKA_CFG_PROCESS_ROLES: controller
       KAFKA_CFG_LISTENERS: CONTROLLER://:9091
@@ -31,7 +34,6 @@ services:
     container_name: kafka-controller-1
     environment:
       <<: *kafka-common-env
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_NODE_ID: 1001
       KAFKA_CFG_PROCESS_ROLES: controller
       KAFKA_CFG_LISTENERS: CONTROLLER://:9092
@@ -41,7 +43,6 @@ services:
     container_name: kafka-controller-2
     environment:
       <<: *kafka-common-env
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_NODE_ID: 1002
       KAFKA_CFG_PROCESS_ROLES: controller
       KAFKA_CFG_LISTENERS: CONTROLLER://:9093
@@ -59,8 +60,11 @@ services:
       test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 20s
       timeout: 10s
-      retries: 10
-      start_period: 10s
+      retries: 15
+      start_period: 30s
+    volumes:
+      - ./jmx/kafka_broker.yml:/opt/kafka_broker.yml:ro
+      - ./jmx/jmx_prometheus_javaagent-1.0.1.jar:/opt/jmx_prometheus_javaagent-1.0.1.jar:ro
     environment:
       <<: *kafka-common-env
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -68,7 +72,8 @@ services:
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: broker
       KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL://:9094
-      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://:9092,EXTERNAL://kafka-broker-0:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka-broker-0:9092,EXTERNAL://kafka-broker-0:9094
+      EXTRA_ARGS: "-javaagent:/opt/jmx_prometheus_javaagent-1.0.1.jar=9404:/opt/kafka_broker.yml"
 
   kafka-broker-1:
     <<: *kafka-common
@@ -83,8 +88,11 @@ services:
       test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 20s
       timeout: 10s
-      retries: 10
-      start_period: 10s
+      retries: 15
+      start_period: 30s
+    volumes:
+      - ./jmx/kafka_broker.yml:/opt/kafka_broker.yml:ro
+      - ./jmx/jmx_prometheus_javaagent-1.0.1.jar:/opt/jmx_prometheus_javaagent-1.0.1.jar:ro
     environment:
       <<: *kafka-common-env
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -92,7 +100,8 @@ services:
       KAFKA_CFG_NODE_ID: 1
       KAFKA_CFG_PROCESS_ROLES: broker
       KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL://:9095
-      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://:9092,EXTERNAL://kafka-broker-1:9095
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka-broker-1:9092,EXTERNAL://kafka-broker-1:9095
+      EXTRA_ARGS: "-javaagent:/opt/jmx_prometheus_javaagent-1.0.1.jar=9404:/opt/kafka_broker.yml"
 
   kafka-broker-2:
     <<: *kafka-common
@@ -107,8 +116,11 @@ services:
       test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 20s
       timeout: 10s
-      retries: 10
-      start_period: 10s
+      retries: 15
+      start_period: 30s
+    volumes:
+      - ./jmx/kafka_broker.yml:/opt/kafka_broker.yml:ro
+      - ./jmx/jmx_prometheus_javaagent-1.0.1.jar:/opt/jmx_prometheus_javaagent-1.0.1.jar:ro
     environment:
       <<: *kafka-common-env
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -116,13 +128,14 @@ services:
       KAFKA_CFG_NODE_ID: 2
       KAFKA_CFG_PROCESS_ROLES: broker
       KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL://:9096
-      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://:9092,EXTERNAL://kafka-broker-2:9096
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka-broker-2:9092,EXTERNAL://kafka-broker-2:9096
+      EXTRA_ARGS: "-javaagent:/opt/jmx_prometheus_javaagent-1.0.1.jar=9404:/opt/kafka_broker.yml"
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "8080:8080"
     depends_on:
@@ -132,16 +145,20 @@ services:
         condition: service_healthy
       kafka-broker-2:
         condition: service_healthy
+      schema-registry:
+        condition: service_healthy
     environment:
-      KAFKA_CLUSTERS_0_NAME: project-3-kafka-cluster
+      KAFKA_CLUSTERS_0_NAME: PRACTICAL-WORK-5-KAFKA-CLUSTER
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-0:9092,kafka-broker-1:9092,kafka-broker-2:9092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:latest
+    image: confluentinc/cp-schema-registry:7.8.3
     container_name: schema-registry
     hostname: schema-registry
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "8081:8081"
     depends_on:
@@ -155,47 +172,44 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/subjects" ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 10
+      start_period: 30s
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-2:9092,PLAINTEXT://kafka-broker-1:9092,PLAINTEXT://kafka-broker-0:9092
-      SCHEMA_REGISTRY_DEBUG: true
 
   postgres:
-    image: debezium/postgres:16
+    image: debezium/postgres:17-alpine
     hostname: postgres
     container_name: postgres
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "5432:5432"
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres-user", "-d", "project3" ]
+      test: [ "CMD", "pg_isready", "-U", "postgres_user", "-d", "practical_work_5_database" ]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
     volumes:
-      - ./postgres/custom-config.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/configuration.conf:/etc/postgresql/postgresql.conf
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     environment:
-      POSTGRES_USER: postgres-user
-      POSTGRES_PASSWORD: postgres-password
-      POSTGRES_DB: project3
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: practical_work_5_database
 
   kafka-connect:
-    build:
-      context: ./kafka-connect
+    image: confluentinc/cp-kafka-connect:7.7.1
     container_name: kafka-connect
+    hostname: kafka-connect
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "8083:8083"
-      - "9875:9875"
-      - "9876:9876"
     depends_on:
       kafka-broker-0:
         condition: service_healthy
@@ -203,48 +217,47 @@ services:
         condition: service_healthy
       kafka-broker-2:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
       schema-registry:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./plugins/:/etc/kafka-connect/jars
-    command: >
-      bash -c "
-        /etc/confluent/docker/run &
-        sleep 20 &&
-        curl -X PUT -H 'Content-Type: application/json' \
-          --data @/kafka/connectors/debezium-postgres-config.json \
-          http://localhost:8083/connectors/pg-connector/config
-        wait -n
-      "
+      - ./jmx/jmx_prometheus_javaagent-1.0.1.jar:/opt/jmx_prometheus_javaagent-1.0.1.jar:ro
+      - ./jmx/kafka_connect.yml:/opt/kafka_connect.yml:ro
     environment:
+      CONNECT_REST_LISTENERS: http://0.0.0.0:8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_REST_ADVERTISED_PORT: 8083
       CONNECT_BOOTSTRAP_SERVERS: kafka-broker-0:9092,kafka-broker-1:9092,kafka-broker-2:9092
-      CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: kafka-connect
-      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_CONFIG_STORAGE_TOPIC: connect_config_storage
+      CONNECT_OFFSET_STORAGE_TOPIC: connect_offset_storage
+      CONNECT_STATUS_STORAGE_TOPIC: connect_status_storage
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_CONFIG_STORAGE_TOPIC: connect-config-storage
-      CONNECT_OFFSET_STORAGE_TOPIC: connect-offset-storage
-      CONNECT_STATUS_STORAGE_TOPIC: connect-status-storage
+      CONNECT_OFFSET_STORAGE_PARTITIONS: 25
+      CONNECT_STATUS_STORAGE_PARTITIONS: 5
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081/
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081/
-      KAFKA_JMX_PORT: 9875
-      KAFKA_OPTS: -javaagent:/opt/jmx_prometheus_javaagent-0.15.0.jar=9876:/opt/kafka-connect.yml
-      CONNECT_CONFIG_PROVIDERS: file
-      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
-      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_INTERNAL_KEY_CONVERTER_SCHEMAS_ENABLE: false
+      CONNECT_INTERNAL_VALUE_CONVERTER_SCHEMAS_ENABLE: false
+      CONNECT_PLUGIN_PATH: /usr/share/confluent-hub-components,/usr/share/java,/etc/kafka-connect/jars
+      KAFKA_OPTS: -javaagent:/opt/jmx_prometheus_javaagent-1.0.1.jar=9404:/opt/kafka_connect.yml
 
   prometheus:
-    image: prom/prometheus:v2.30.3
+    image: prom/prometheus:latest
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "9090:9090"
     volumes:
@@ -257,21 +270,8 @@ services:
       dockerfile: Dockerfile
     container_name: grafana
     networks:
-      - project-3-network
+      - practical-work-5-network
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
-
-  consumer:
-    build:
-      context: ./consumer
-      dockerfile: Dockerfile
-    container_name: consumer
-    networks:
-      - project-3-network
-    depends_on:
-      - kafka-connect
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka-broker-2:9096,kafka-broker-1:9095,kafka-broker-0:9094
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081

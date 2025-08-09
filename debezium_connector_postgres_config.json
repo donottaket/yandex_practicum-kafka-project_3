@@ -1,0 +1,33 @@
+{
+  "name": "practical-work-5-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "topic.prefix": "practical_work_5",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres_user",
+    "database.password": "postgres_password",
+    "database.dbname": "practical_work_5_database",
+    "slot.name": "dbz_pw5_slot",
+    "slot.drop.on.stop": "false",
+    "schema.include.list": "public",
+    "table.include.list": "public.users,public.orders",
+    "snapshot.mode": "initial",
+    "snapshot.fetch.size": "20000",
+    "heartbeat.interval.ms": "10000",
+    "max.batch.size": "2048",
+    "max.queue.size": "8192",
+    "max.queue.size.in.bytes": "0",
+    "poll.interval.ms": "1000",
+    "time.precision.mode": "adaptive_time_microseconds",
+    "include.schema.changes": "false",
+    "provide.transaction.metadata": "true",
+    "tombstones.on.delete": "false",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "transforms.unwrap.add.fields": "op,ts_ms,lsn,source.ts_ms"
+  }
+}
