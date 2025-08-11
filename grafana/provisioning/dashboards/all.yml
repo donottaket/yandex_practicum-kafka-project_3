@@ -1,11 +1,14 @@
 apiVersion: 1
+
 providers:
-  - name: default
+  - name: 'dashboards-from-file'
     orgId: 1
-    folder: ''                  # папка в UI (General)
+    folder: ''
+    folderUid: ''
     type: file
     disableDeletion: false
-    allowUiUpdates: true
     updateIntervalSeconds: 10
+    allowUiUpdates: false
     options:
-      path: /var/lib/grafana/dashboards   # путь ВНУТРИ контейнера
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true

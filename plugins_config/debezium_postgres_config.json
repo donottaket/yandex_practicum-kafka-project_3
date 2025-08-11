@@ -1,5 +1,5 @@
 {
-  "name": "practical-work-5-connector",
+  "name": "practical_work_5_debezium_postgres_connector",
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "tasks.max": "1",
@@ -27,7 +27,6 @@
     "transforms": "unwrap",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.drop.tombstones": "true",
-    "transforms.unwrap.delete.handling.mode": "rewrite",
-    "transforms.unwrap.add.fields": "op,ts_ms,lsn,source.ts_ms"
+    "transforms.unwrap.delete.handling.mode": "rewrite"
   }
 }
